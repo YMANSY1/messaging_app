@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:messaging_app/features/chat/models/conversation.dart';
 import 'package:messaging_app/features/chat/models/message.dart';
 import 'package:messaging_app/features/core/service_mixin.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChatService with ServiceMixin {
   final Dio dio;
+  WebSocketChannel? channel;
 
   ChatService(this.dio);
 
@@ -86,5 +90,48 @@ class ChatService with ServiceMixin {
       print("getConversation - Error fetching messages: $e");
       return [];
     }
+  }
+
+  void connectToWebSocket(BigInt senderId, BigInt receiverId) {
+    final wsUrl = 'ws://10.0.2.2:8080/ws?sender=$senderId&receiver=$receiverId';
+    try {
+      print("WebSocket URL: $wsUrl");
+      print("Sender ID (type: ${senderId.runtimeType}): $senderId");
+      print("Receiver ID (type: ${receiverId.runtimeType}): $receiverId");
+      channel = WebSocketChannel.connect(Uri.parse(wsUrl));
+      channel?.ready.then((_) {
+        print("WebSocket connected successfully!");
+        print("Sending initial message (if any)");
+      }, onError: (error) {
+        print("WebSocket connection error: $error");
+      });
+    } catch (e) {
+      print('Error connecting to WebSocket: $e');
+    }
+  }
+
+  void sendMessage(String content) {
+    if (channel != null) {
+      channel?.sink.add(content);
+    } else {
+      print('WebSocket is not connected.');
+    }
+  }
+
+  void listenForMessages(Function(Message) onMessageReceived) {
+    channel?.stream.listen((message) {
+      final decodedMessage = jsonDecode(message);
+      final newMessage = Message.fromJson(decodedMessage);
+      onMessageReceived(newMessage);
+    }, onError: (error) {
+      print('WebSocket Error: $error');
+    }, onDone: () {
+      print('WebSocket connection closed');
+    });
+  }
+
+  void closeWebSocket() {
+    channel?.sink.close();
+    channel = null;
   }
 }

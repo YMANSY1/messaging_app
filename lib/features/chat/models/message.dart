@@ -1,13 +1,13 @@
 import 'package:intl/intl.dart';
 
 class Message {
-  int? id;
+  BigInt? id;
   BigInt? senderId;
-  int? receiverId;
+  BigInt? receiverId;
   String? content;
   DateTime? timeSent;
   bool? isRead;
-  int? conversationId;
+  BigInt? conversationId;
 
   Message({
     this.id,
@@ -20,27 +20,27 @@ class Message {
   });
 
   Message.fromJson(Map<String, dynamic> json) {
-    id = json['id'] as int?;
-    senderId = json['senderId'] != null
-        ? BigInt.tryParse(json['senderId'].toString())
-        : null;
-    receiverId = json['receiverId'] as int?;
+    id = json['id'] != null ? _parseBigInt(json['id']) : null;
+    senderId = json['senderId'] != null ? _parseBigInt(json['senderId']) : null;
+    receiverId =
+        json['receiverId'] != null ? _parseBigInt(json['receiverId']) : null;
     content = json['content'] as String?;
     timeSent = _parseDateTime(json['timeSent']);
     isRead = json['isRead'] as bool?;
-    conversationId = json['conversationId'] as int?;
+    conversationId = json['conversationId'] != null
+        ? _parseBigInt(json['conversationId'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =
-        <String, dynamic>{}; // Use <String, dynamic> for clarity
-    data['id'] = id;
-    data['senderId'] = senderId?.toString(); // Send BigInt as String
-    data['receiverId'] = receiverId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id?.toString();
+    data['senderId'] = senderId?.toString();
+    data['receiverId'] = receiverId?.toString();
     data['content'] = content;
     data['timeSent'] = timeSent?.toIso8601String();
     data['isRead'] = isRead;
-    data['conversationId'] = conversationId;
+    data['conversationId'] = conversationId?.toString();
     return data;
   }
 
@@ -55,6 +55,21 @@ class Message {
       return null;
     } catch (e) {
       print('Error parsing DateTime: $e, value: $timeSentJson');
+      return null;
+    }
+  }
+
+  static BigInt? _parseBigInt(dynamic value) {
+    if (value == null) return null;
+    try {
+      if (value is int) {
+        return BigInt.from(value);
+      } else if (value is String) {
+        return BigInt.tryParse(value);
+      }
+      return null;
+    } catch (e) {
+      print('Error parsing BigInt: $e, value: $value');
       return null;
     }
   }

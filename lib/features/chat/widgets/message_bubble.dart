@@ -7,7 +7,7 @@ import '../models/message.dart'; // Assuming this is the correct path for the Me
 class MessageBubble extends StatelessWidget {
   final Message message;
   final User user;
-  late final isSentByMe = message.senderId != user.id;
+  late final isSentByMe = message.senderId == user.id;
   MessageBubble({super.key, required this.message, required this.user});
 
   @override

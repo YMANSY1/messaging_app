@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:messaging_app/features/chat/screens/chat_screen.dart';
 import 'package:messaging_app/features/core/user.dart';
 import 'package:messaging_app/features/core/user_service.dart';
 
@@ -49,8 +50,9 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                 return UserGridItem(
                   user: user,
                   onStartConversation: () {
-                    //  implement the action here.
-                    print('Start conversation with ${user.username}');
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                            user: widget.currentUser, otherUser: user)));
                   },
                 );
               },

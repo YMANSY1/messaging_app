@@ -1,18 +1,38 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/user.dart';
 import '../models/conversation.dart';
+import '../services/chat_service.dart';
 import '../widgets/user_tile_listview.dart';
 
-class ActiveConversationsView extends StatelessWidget {
+class ActiveConversationsView extends StatefulWidget {
   const ActiveConversationsView({
     super.key,
-    required this.future,
     required this.user,
   });
 
-  final Future<List<Conversation>> future;
   final User user;
+
+  @override
+  State<ActiveConversationsView> createState() =>
+      _ActiveConversationsViewState();
+}
+
+class _ActiveConversationsViewState extends State<ActiveConversationsView> {
+  late Future<List<Conversation>> future;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.user.id != null) {
+      future = ChatService(Dio())
+          .fetchAllConversationsForUser(user1Id: widget.user.id!);
+    } else {
+      // Handle error if user.id is null
+      future = Future.error("User ID is null");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +63,8 @@ class ActiveConversationsView extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child:
-                    UserTileListView(conversations: snapshot.data!, user: user),
+                child: UserTileListView(
+                    conversations: snapshot.data!, user: widget.user),
               ),
             ],
           );

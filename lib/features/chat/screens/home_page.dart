@@ -1,8 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:messaging_app/features/chat/models/conversation.dart';
+import 'package:messaging_app/features/auth/screens/account_information_screen.dart';
+import 'package:messaging_app/features/auth/screens/auth_screen.dart';
 import 'package:messaging_app/features/chat/screens/all_users_screen.dart';
-import 'package:messaging_app/features/chat/services/conversation_service.dart';
 
 import '../../core/user.dart';
 import 'active_conversations_view.dart';
@@ -19,19 +18,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late Future<List<Conversation>> _future;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    if (widget.user.id != null) {
-      _future = ChatService(Dio())
-          .fetchAllConversationsForUser(user1Id: widget.user.id!);
-    } else {
-      // Handle error if user.id is null
-      _future = Future.error("User ID is null");
-    }
   }
 
   @override
@@ -42,9 +33,54 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('InSync'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (String value) {
+              // Handle the selected menu item
+              if (value == 'account_info') {
+                // Navigate to account information screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AccountInformationScreen(
+                      user: widget.user,
+                    ),
+                  ),
+                );
+              } else if (value == 'logout') {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => AuthScreen()),
+                    (_) => false);
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'account_info',
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.account_circle), // Account info icon
+                    SizedBox(width: 8),
+                    Text('Account Information'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.logout), // Logout icon
+                    SizedBox(width: 8),
+                    Text('Log Out'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -57,8 +93,8 @@ class _HomePageState extends State<HomePage>
         controller: _tabController,
         children: [
           // First Tab: Active Conversations
-          ActiveConversationsView(future: _future, user: widget.user),
-          // Second Tab: All Users (currently empty)
+          ActiveConversationsView(user: widget.user),
+          // Second Tab: All Users
           AllUsersScreen(
             currentUser: widget.user,
           ), // You can add content for the "All Users" tab here

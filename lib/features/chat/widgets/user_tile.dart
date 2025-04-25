@@ -14,11 +14,9 @@ class UserTile extends StatelessWidget {
   });
 
   final User user;
-
   late final otherUser = conversation.user1?.id == user.id
       ? conversation.user2
       : conversation.user1;
-
   final Conversation conversation;
 
   @override
@@ -46,7 +44,7 @@ class UserTile extends StatelessWidget {
                 radius: 25,
                 fontSize: 24,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +54,7 @@ class UserTile extends StatelessWidget {
                       children: [
                         Text(
                           otherUser?.username ?? "No name",
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
@@ -64,33 +62,38 @@ class UserTile extends StatelessWidget {
                         Text(
                           conversation.lastMessage?.formatMessageTimestamp() ??
                               "no date",
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Colors.blueGrey,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          '${conversation.lastMessage!.senderId == user.id ? 'You' : otherUser?.username ?? 'Unknown'}: ${conversation.lastMessage!.content}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.blueGrey,
+                        Expanded(
+                          // Wrap the Text widget with Expanded
+                          child: Text(
+                            '${conversation.lastMessage!.senderId == user.id ? 'You' : otherUser?.username ?? 'Unknown'}: ${conversation.lastMessage!.content}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.blueGrey,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         conversation.lastMessage!.senderId == user.id
-                            ? Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
+                            ? const Padding(
+                                padding: EdgeInsets.only(left: 8.0),
                                 child: Icon(
                                   Icons.done_all,
                                   color: Colors.blueGrey,
                                   size: 20,
                                 ),
                               )
-                            : SizedBox()
+                            : const SizedBox()
                       ],
                     ),
                   ],
